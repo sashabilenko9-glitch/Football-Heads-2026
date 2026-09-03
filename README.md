@@ -60,7 +60,7 @@ gradlew.bat run        # Windows
 
 ```bash
 ./gradlew build
-java -jar build/libs/football-heads-2026-1.0.0.jar
+java -jar build/libs/football-heads-2026-1.0.0-all.jar   # bundles slf4j/logback, runs standalone
 ```
 
 ### Run the quality gates locally

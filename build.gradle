@@ -5,6 +5,7 @@ plugins {
     id 'jacoco'
     id 'com.github.spotbugs' version '6.5.11'
     id 'com.diffplug.spotless' version '8.10.1'
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 group = 'com.footballheads'
@@ -19,6 +20,13 @@ java {
 application {
     mainClass = 'com.footballheads.Main'
 }
+
+// shadowJar (default output: build/libs/<name>-<version>-all.jar) bundles
+// slf4j/logback in, so `java -jar ...-all.jar` runs standalone. Left at its
+// default "-all" classifier rather than colliding with the plain jar's
+// filename - Gradle's task-output validation flags that collision as
+// incorrect against the application plugin's distZip/distTar/startScripts,
+// which read the plain jar's output path.
 
 repositories {
     mavenCentral()

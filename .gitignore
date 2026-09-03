@@ -7,7 +7,7 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 
-# Generated Javadoc (regenerate with: javadoc -d doc -sourcepath src -subpackages com:entities:ui:utils)
+# Generated Javadoc (regenerate with: ./gradlew javadoc -> build/docs/javadoc)
 /doc/
 
 # University submission files (not part of the game)

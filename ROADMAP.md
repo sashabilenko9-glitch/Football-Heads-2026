@@ -11,17 +11,20 @@ Everything below unlocks testing, AI, and CI — do this before adding features.
 
 - [ ] Extract a Swing-free `MatchEngine` / `MatchState` from `GamePanel`: pure
       state + a `step()` method, no rendering, no input. `GamePanel` becomes a
-      thin view/controller on top of it.
-- [ ] Add JUnit 5 and cover the pure logic first: ball/crossbar/player
+      thin view/controller on top of it. (Note: `GamePanel` now has its own
+      `MatchState` enum for pause/celebration/ended - see
+      docs/adr/0007 - but it's still Swing-bound; this item is about pulling
+      the simulation itself out into a standalone, testable/reusable class.)
+- [x] Add JUnit 5 and cover the pure logic first: ball/crossbar/player
       collisions, goal detection, golden goal timer.
-- [ ] Migrate from a raw Eclipse project to Maven or Gradle.
-- [ ] Add GitHub Actions CI: build + run tests on every push/PR, badge in
+- [x] Migrate from a raw Eclipse project to Maven or Gradle.
+- [x] Add GitHub Actions CI: build + run tests on every push/PR, badge in
       README.
-- [ ] Wire in static analysis (Checkstyle/PMD/SpotBugs) as a CI check.
-- [ ] Add a formatter (Spotless + google-java-format) and a pre-commit hook.
-- [ ] Cleanup pass: remove the dead code found in review (unused `Field`
+- [x] Wire in static analysis (Checkstyle/PMD/SpotBugs) as a CI check.
+- [x] Add a formatter (Spotless + google-java-format) and a pre-commit hook.
+- [x] Cleanup pass: remove the dead code found in review (unused `Field`
       wall/limit constants, unused `Player.headImage`).
-- [ ] Replace ad-hoc `System.out`/nothing with SLF4J logging.
+- [x] Replace ad-hoc `System.out`/nothing with SLF4J logging.
 - [ ] Add `module-info.java` (JPMS) — `.classpath` already targets
       `module=true`.
 
@@ -32,7 +35,7 @@ Everything below unlocks testing, AI, and CI — do this before adding features.
 - [ ] Settings screen: key rebinding, volume, fullscreen toggle.
 - [ ] Persist settings to disk (`Properties` or JSON under a user config dir).
 - [ ] Persist local match stats/high scores.
-- [ ] Externalize UI strings into a `ResourceBundle` (German + English
+- [x] Externalize UI strings into a `ResourceBundle` (German + English
       toggle).
 - [ ] Colorblind-friendly palette option.
 
@@ -69,18 +72,27 @@ Everything below unlocks testing, AI, and CI — do this before adding features.
 
 ## Engineering practices (ongoing, not tied to a version)
 
-- [ ] Conventional Commits + auto-generated changelog (e.g. release-please).
-- [ ] Architecture Decision Records under `docs/adr/` for major design
+- [x] Conventional Commits + auto-generated changelog (e.g. release-please).
+      Convention documented in CONTRIBUTING.md; `.github/workflows/release-please.yml`
+      is wired up but unverified against a live commit history yet - review its
+      first PR carefully.
+- [x] Architecture Decision Records under `docs/adr/` for major design
       choices.
 - [ ] Issue tracker with labels/milestones mirroring this roadmap.
+      `scripts/create-github-issues.sh` bulk-creates them from this file once
+      the repo is on GitHub with `gh` authenticated - hasn't been run yet.
 - [ ] Branch-per-feature with self-review PRs, even solo — keeps history
       readable.
-- [ ] Code coverage tracking (JaCoCo) with a minimum threshold enforced in
+- [x] Code coverage tracking (JaCoCo) with a minimum threshold enforced in
       CI.
-- [ ] Javadoc published via GitHub Pages.
-- [ ] CI builds and attaches a runnable jar/installer to each tagged
-      release.
+- [x] Javadoc published via GitHub Pages. `.github/workflows/javadoc.yml`
+      needs a one-time repo setting (Settings → Pages → Source → "GitHub
+      Actions") to actually publish.
+- [x] CI builds and attaches a runnable jar to each tagged release
+      (`.github/workflows/release.yml`). The "installer" half is the
+      `jpackage` item under v3.0 below - not done yet.
 - [ ] Performance profiling pass (JFR/VisualVM) once AI/netcode add real
       load.
-- [ ] Make existing implicit patterns explicit: State (game states),
-      Strategy (AI difficulty), Observer (goal/match events).
+- [x] State (`GamePanel.MatchState`) and Observer (`MatchListener`) are now
+      explicit - see docs/adr/0007. Strategy (AI difficulty) is deliberately
+      deferred until an AI actually exists - see docs/adr/0008.

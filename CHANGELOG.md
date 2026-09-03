@@ -5,6 +5,43 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Engineering-foundations work from ROADMAP.md's v1.1 milestone. No player-visible gameplay
+changes other than the new language toggle.
+
+### Added
+- English translation alongside German, with a toggle in the main menu
+  (`Messages`/`messages_{de,en}.properties`); German remains the default.
+- SLF4J + Logback logging (match start, goals, match end, uncaught exceptions).
+- `MatchListener`, an Observer hook for goal/match-end events (currently used
+  only for logging; the intended seam for future sound effects/replays).
+- JUnit 5 test suite for `entities`/`utils`, including headless rendering
+  smoke tests; `./gradlew check` enforces a 60% coverage floor on that layer.
+- Gradle build with Checkstyle, PMD, SpotBugs and Spotless wired into
+  `./gradlew check`; GitHub Actions CI, a release workflow that attaches a
+  runnable jar to tagged releases, a release-please workflow, and a
+  Javadoc-to-GitHub-Pages workflow.
+- `docs/adr/` — Architecture Decision Records explaining the non-obvious
+  choices in this codebase, past and present.
+
+### Changed
+- `GamePanel`'s `matchEnded`/`paused`/`goalCelebration` booleans replaced by
+  a single `MatchState` enum (State pattern).
+- Team roster in `entities/Team.java`: the 10 teams are now named after real
+  footballers whose kit colors match each team's palette, instead of course
+  staff names.
+- Project layout moved to the Gradle-standard `src/main/java`/`src/test/java`.
+
+### Fixed
+- Removed dead code (unused `Field` constants, unused `Player.headImage`).
+- Missing `serialVersionUID` on Swing components; non-serializable fields
+  marked `transient`.
+- `TeamSelectPanel` used a default-locale `toUpperCase()` (locale-dependent
+  bug risk); now explicit `Locale.ROOT`.
+- `Stadium`'s constructor created a second, immediately-discarded `Random`
+  instead of reusing the instance field.
+
 ## [1.0.0] - 2026-09-03
 
 Initial public release.
