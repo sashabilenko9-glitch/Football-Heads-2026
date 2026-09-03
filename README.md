@@ -2,14 +2,17 @@
 
 A local 2-player "Head Soccer" style game built in Java Swing — fast, chaotic couch matches with exaggerated physics, golden goal overtime, and a match log at full time.
 
-![Java](https://img.shields.io/badge/Java-23%2B-orange)
-![Build](https://img.shields.io/badge/build-Eclipse%20%2F%20javac-blue)
+![Java](https://img.shields.io/badge/Java-21%2B-orange)
+![Build](https://img.shields.io/badge/build-Gradle-02303A?logo=gradle)
 ![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-lightgrey)
 ![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
 
+<!-- Once pushed to GitHub, replace <owner>/<repo> below to show the live CI badge:
+![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg) -->
+
 > Note: the in-game UI text is in German (this was originally a university programming assignment). This document is in English for a wider audience.
 
-See [CHANGELOG.md](CHANGELOG.md) for release notes and [ROADMAP.md](ROADMAP.md) for what's planned next.
+See [CHANGELOG.md](CHANGELOG.md) for release notes, [ROADMAP.md](ROADMAP.md) for what's planned next, [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow, and [docs/adr/](docs/adr/) for the reasoning behind non-obvious decisions.
 
 ## Screenshots
 
@@ -43,41 +46,46 @@ On-screen buttons for both players are also available via the **TASTEN** toggle 
 
 ### Requirements
 
-- JDK 23 or newer (tested with JDK 24)
-
-### Run from Eclipse
-
-1. `File → Import → Existing Projects into Workspace`, select this folder.
-2. Run `com.footballheads.Main`.
+- JDK 21 or newer to build (a JDK 21 toolchain is auto-provisioned by Gradle if you don't have one)
+- Nothing else — the Gradle Wrapper (`gradlew`/`gradlew.bat`) downloads Gradle itself on first run
 
 ### Run from the command line
 
 ```bash
-# Compile
-javac -d bin -sourcepath src $(find src -name "*.java")
-
-# Run
-java -cp bin com.footballheads.Main
+./gradlew run          # Linux/macOS
+gradlew.bat run        # Windows
 ```
 
-On Windows PowerShell, compile with:
+### Build a runnable jar
 
-```powershell
-Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName } | Out-File sources.txt
-javac -d bin -sourcepath src "@sources.txt"
-java -cp bin com.footballheads.Main
+```bash
+./gradlew build
+java -jar build/libs/football-heads-2026-1.0.0.jar
 ```
+
+### Run the quality gates locally
+
+```bash
+./gradlew check         # tests + coverage gate + checkstyle + PMD + SpotBugs + format check
+./gradlew spotlessApply # auto-fix formatting
+```
+
+### Run from Eclipse
+
+Eclipse's Buildship plugin reads `build.gradle` directly:
+`File → Import → Gradle → Existing Gradle Project`, select this folder, run `com.footballheads.Main`.
 
 ### Generate the Javadoc
 
 ```bash
-javadoc -d doc -sourcepath src -subpackages com:entities:ui:utils
+./gradlew javadoc
+# output: build/docs/javadoc/index.html
 ```
 
 ## Project structure
 
 ```
-src/
+src/main/java/
 ├── com/footballheads/   # Application entry point, game window, game loop, input handling
 │   ├── Main.java
 │   ├── GameFrame.java
@@ -98,6 +106,8 @@ src/
 │   └── MobileControlsPanel.java
 └── utils/
     └── Field.java        # Shared field constants
+
+src/test/java/            # JUnit 5 tests for entities/utils (see docs/adr/0006-coverage-scope.md)
 ```
 
 ## How it works

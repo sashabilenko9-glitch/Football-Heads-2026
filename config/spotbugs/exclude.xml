@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!--
+      Swing components are never actually serialized in this application;
+      the Serializable-related detectors mostly flag noise inherent to
+      extending JPanel/JFrame. serialVersionUID is still declared explicitly
+      on every named subclass (see docs/adr/0005-quality-gate-tooling.md).
+    -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
+        <Bug pattern="SE_NO_SERIALVERSIONID"/>
+        <Class name="~.*\$\d+"/>
+    </Match>
+
+    <!--
+      entities.Ball / entities.Player are intentionally plain, mutable physics
+      structs (public x/y/vx/vy etc.), the same pattern used by e.g. libGDX's
+      Vector2: the hot per-frame physics/collision code reads and writes these
+      dozens of times a frame, and wrapping every field in a getter/setter adds
+      no safety here (they're read/written from the same trusted package) while
+      hurting readability of the collision math. See docs/adr/0005-quality-gate-tooling.md.
+    -->
+    <Match>
+        <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE"/>
+        <Package name="entities"/>
+    </Match>
+
+    <!--
+      EI/EI2 (exposing/storing a mutable reference) fires on the normal parent-child
+      wiring between Swing components (GamePanel keeping its GameFrame, MobileControlsPanel
+      keeping its GamePanel, GamePanel handing out its InputManager). Defensive copies of a
+      JFrame/JPanel/InputManager are not meaningful - these are shared, singleton-per-match
+      collaborators by design.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.footballheads.GamePanel"/>
+            <Class name="ui.MobileControlsPanel"/>
+        </Or>
+    </Match>
+</FindBugsFilter>

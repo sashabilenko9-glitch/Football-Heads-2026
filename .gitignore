@@ -2,6 +2,11 @@
 /bin/
 *.class
 
+# Gradle
+.gradle/
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
 # Generated Javadoc (regenerate with: javadoc -d doc -sourcepath src -subpackages com:entities:ui:utils)
 /doc/
 
@@ -10,7 +15,10 @@ Abgabe_*.zip
 BelegBilenko*.pdf
 BelegBilenko*.docx
 
-# Eclipse (workspace-level, not the small shared .settings/ prefs)
+# Eclipse (Buildship regenerates these on Gradle import - not committed)
+.classpath
+.project
+.settings/
 .metadata/
 *.launch
 

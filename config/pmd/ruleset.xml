@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<ruleset name="football-heads-2026"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Best-practice and error-prone checks only. Design/complexity/codestyle
+        categories are intentionally left out: this is a small Swing game
+        where large paintComponent()-style methods are normal, and codestyle
+        overlaps with Spotless/Checkstyle. See docs/adr/0005-quality-gate-tooling.md.
+    </description>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <!-- Assigning null in reset()-style methods is an intentional, idiomatic pattern here. -->
+        <exclude name="NullAssignment"/>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="ArrayIsStoredDirectly"/>
+        <exclude name="AccessorClassGeneration"/>
+        <exclude name="AccessorMethodGeneration"/>
+        <exclude name="UnusedFormalParameter"/>
+        <exclude name="GuardLogStatement"/>
+        <!-- A test asserting several related fields (e.g. all of reset()'s effects) in one
+             @Test reads better than five near-duplicate test methods; messages are added only
+             where the failure wouldn't already be obvious from the assertion itself. -->
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+    </rule>
+</ruleset>
