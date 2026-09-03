@@ -10,16 +10,11 @@ A local 2-player "Head Soccer" style game built in Java Swing — fast, chaotic 
 <!-- Once pushed to GitHub, replace <owner>/<repo> below to show the live CI badge:
 ![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg) -->
 
-> Note: the in-game UI text is in German (this was originally a university programming assignment). This document is in English for a wider audience.
+> Note: the in-game UI text defaults to German (this was originally a university programming assignment) with an English toggle in the main menu. This document is in English for a wider audience.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes, [ROADMAP.md](ROADMAP.md) for what's planned next, [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow, and [docs/adr/](docs/adr/) for the reasoning behind non-obvious decisions.
 
-## Screenshots
-
-<!-- Add screenshots here, e.g.: -->
-<!-- ![Menu](screenshots/menu.png) -->
-<!-- ![Match](screenshots/match.png) -->
-<!-- ![Match end](screenshots/end.png) -->
+<img src="screenshots/menu.png" width="700" alt="Main menu with PLAY, CONTROLS, EXIT and a language toggle">
 
 ## Features
 
@@ -27,9 +22,17 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes, [ROADMAP.md](ROADMAP.md) for
 - **Physics-driven gameplay** — gravity, crossbar bounces, ball spin, player-vs-player collisions, all running on a fixed-timestep loop so speed stays consistent regardless of frame rate.
 - **60-second matches with Golden Goal** — a draw at full time triggers sudden-death overtime.
 - **10 selectable teams**, each modeled after a real footballer's shirt colors (Messi, Mbappé, Pelé, Haaland, Lewandowski, Maldini, and more).
+
+<img src="screenshots/teams.png" width="700" alt="Team select screen: Kylian Mbappé vs. Erling Haaland">
+
 - **On-screen touch controls** — an overlay with WASD / arrow-key buttons for mouse or touch input, alongside full keyboard support.
 - **Resizable window with letterboxing** — the field keeps its aspect ratio and stays perfectly round at any window size.
+
+<img src="screenshots/match2.png" width="700" alt="A goal celebration mid-match, score 6:1">
+
 - **Match summary screen** — goal-by-goal log (including own goals and golden goals) with a rematch/menu option.
+
+<img src="screenshots/end.png" width="700" alt="Match summary screen with a goal-by-goal log for both teams">
 
 ## Controls
 
@@ -40,7 +43,13 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes, [ROADMAP.md](ROADMAP.md) for
 | Kick       | `S`               | `↓`                |
 | Pause      | `Esc`             | `Esc`              |
 
-On-screen buttons for both players are also available via the **TASTEN** toggle during a match (mouse/touch only supports one button at a time per cursor).
+On-screen buttons for both players are also available via the **KEYS** toggle during a match (mouse/touch only supports one button at a time per cursor):
+
+<img src="screenshots/match1.png" width="700" alt="A match in progress with the on-screen WASD and arrow-key button overlay visible">
+
+Pausing brings up a quick resume/restart/main-menu overlay:
+
+<img src="screenshots/pause.png" width="700" alt="Pause overlay with RESUME, RESTART and MAIN MENU options">
 
 ## Getting started
 

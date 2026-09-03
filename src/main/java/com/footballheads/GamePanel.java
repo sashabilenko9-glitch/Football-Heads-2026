@@ -729,10 +729,10 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     String title;
     Color titleColor;
     if (p1.score > p2.score) {
-      title = team1.name + Messages.get("end.winSuffix");
+      title = team1.name + "  " + Messages.get("end.winSuffix");
       titleColor = displayColor(team1.primaryColor);
     } else if (p2.score > p1.score) {
-      title = team2.name + Messages.get("end.winSuffix");
+      title = team2.name + "  " + Messages.get("end.winSuffix");
       titleColor = displayColor(team2.primaryColor);
     } else {
       title = Messages.get("end.draw");
@@ -820,7 +820,8 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
 
     for (int i = fromIdx; i < total && (i - fromIdx) < shown; i++) {
       GoalEvent ev = events.get(i);
-      String label = ev.isOwnGoal ? ev.playerName + Messages.get("end.ownGoal") : ev.playerName;
+      String label =
+          ev.isOwnGoal ? ev.playerName + "  " + Messages.get("end.ownGoal") : ev.playerName;
       if (ev.isGoldenGoal) label += "  ⭐";
       Color entryColor = ev.isOwnGoal ? C_OWN_GOAL_C : C_WHITE;
 
