@@ -9,6 +9,8 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ui.PauseMenu;
 
 /**
@@ -118,6 +120,20 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     }
   }
 
+  /**
+   * Zustände des Spielablaufs (State-Pattern). Ersetzt die früheren einzelnen {@code
+   * matchEnded}/{@code paused}/{@code goalCelebration}-Flags durch einen einzigen, stets
+   * eindeutigen Zustand - siehe docs/adr/0007-state-and-observer-patterns.md.
+   */
+  private enum MatchState {
+    PLAYING,
+    PAUSED,
+    GOAL_CELEBRATION,
+    ENDED
+  }
+
+  private static final Logger LOG = LoggerFactory.getLogger(GamePanel.class);
+
   // Not designed to survive Swing serialization (no game ever gets serialized) - see
   // docs/adr/0005-quality-gate-tooling.md.
   private final transient GameFrame parentFrame;
@@ -142,9 +158,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
   /** Vertikaler Versatz des Spielfelds im Panel (Letterbox-Rand). */
   private double offsetY = 0;
 
-  private boolean matchEnded = false;
-  private boolean paused = false;
-  private boolean goalCelebration = false;
+  private MatchState state = MatchState.PLAYING;
   private int goalResetTimer = 0;
 
   /** {@code true}, wenn nach der laufenden Tor-Feier das Spiel endet (Golden Goal). */
@@ -163,6 +177,13 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
   private final transient List<GoalEvent> matchEvents = new ArrayList<>();
 
   /**
+   * Beobachter für Tor- und Spielende-Ereignisse (Observer-Pattern). Entkoppelt die Spiellogik von
+   * dem, was auf ein Tor/Spielende reagiert - aktuell nur Logging, künftig z.&nbsp;B. Soundeffekte
+   * oder eine Replay-Aufzeichnung (siehe ROADMAP.md).
+   */
+  private final transient List<MatchListener> matchListeners = new ArrayList<>();
+
+  /**
    * Stellt den {@link InputManager} für das {@code MobileControlsPanel} und andere externe
    * Komponenten bereit.
    *
@@ -173,12 +194,21 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
   }
 
   /**
+   * Registriert einen Beobachter für Tor- und Spielende-Ereignisse.
+   *
+   * @param listener zu registrierender Beobachter
+   */
+  public void addMatchListener(MatchListener listener) {
+    matchListeners.add(listener);
+  }
+
+  /**
    * Gibt an, ob das Spiel gerade pausiert ist.
    *
    * @return {@code true}, wenn das Spiel gerade pausiert ist
    */
   public boolean isPaused() {
-    return paused;
+    return state == MatchState.PAUSED;
   }
 
   /**
@@ -187,7 +217,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
    * @return {@code true}, wenn der Endbildschirm angezeigt wird
    */
   public boolean isMatchEnded() {
-    return matchEnded;
+    return state == MatchState.ENDED;
   }
 
   /**
@@ -215,9 +245,29 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     setLayout(new BorderLayout());
     add(pauseMenu, BorderLayout.CENTER);
 
+    addMatchListener(new LoggingMatchListener());
+
+    LOG.info("New match: {} vs {}", t1.name, t2.name);
     restartGame();
     SwingUtilities.invokeLater(this::requestFocusInWindow);
     gameTimer.start();
+  }
+
+  /** Protokolliert Tor- und Spielende-Ereignisse über SLF4J. */
+  private static final class LoggingMatchListener implements MatchListener {
+    @Override
+    public void onGoal(String scoringTeamName, boolean ownGoal, boolean goldenGoal) {
+      LOG.info(
+          "Goal for {}{}{}",
+          scoringTeamName,
+          ownGoal ? " (own goal)" : "",
+          goldenGoal ? " [GOLDEN GOAL]" : "");
+    }
+
+    @Override
+    public void onMatchEnded(String team1Name, int score1, String team2Name, int score2) {
+      LOG.info("Match ended: {} {} - {} {}", team1Name, score1, score2, team2Name);
+    }
   }
 
   /**
@@ -242,7 +292,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
             new AbstractAction() {
               @Override
               public void actionPerformed(ActionEvent e) {
-                if (!matchEnded) togglePause();
+                if (state != MatchState.ENDED) togglePause();
               }
             });
   }
@@ -289,9 +339,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     timeLeft = MATCH_DURATION;
     goldenTime = false;
     extraTime = 0;
-    matchEnded = false;
-    paused = false;
-    goalCelebration = false;
+    state = MatchState.PLAYING;
     goldenGoalPending = false;
     matchEvents.clear();
     lastTimeNs = System.nanoTime();
@@ -309,10 +357,10 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
    * Tor-Feier.
    */
   public void togglePause() {
-    if (matchEnded || goalCelebration) return;
-    paused = !paused;
-    if (pauseMenu != null) pauseMenu.setVisible(paused);
-    if (!paused) {
+    if (state == MatchState.ENDED || state == MatchState.GOAL_CELEBRATION) return;
+    state = (state == MatchState.PAUSED) ? MatchState.PLAYING : MatchState.PAUSED;
+    if (pauseMenu != null) pauseMenu.setVisible(state == MatchState.PAUSED);
+    if (state == MatchState.PLAYING) {
       lastTimeNs = System.nanoTime();
       lastFrameNs = lastTimeNs;
       accumulatorNs = 0;
@@ -332,7 +380,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     long frameNs = now - lastFrameNs;
     lastFrameNs = now;
 
-    if (paused || matchEnded) {
+    if (state == MatchState.PAUSED || state == MatchState.ENDED) {
       // Weiter zeichnen, damit halbtransparente Overlays keine Artefakte hinterlassen
       repaint();
       return;
@@ -341,7 +389,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     if (frameNs > MAX_FRAME_NS) frameNs = MAX_FRAME_NS;
     accumulatorNs += frameNs;
 
-    while (accumulatorNs >= STEP_NS && !matchEnded) {
+    while (accumulatorNs >= STEP_NS && state != MatchState.ENDED) {
       stepGame();
       accumulatorNs -= STEP_NS;
     }
@@ -365,10 +413,10 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
 
     stadium.update();
 
-    if (goalCelebration) {
+    if (state == MatchState.GOAL_CELEBRATION) {
       goalResetTimer--;
       if (goalResetTimer <= 0) {
-        goalCelebration = false;
+        state = MatchState.PLAYING;
         if (goldenGoalPending) {
           endMatch();
           return;
@@ -438,15 +486,18 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
    * ausgelöst, damit der entscheidende Treffer nicht abrupt im Endbildschirm untergeht.
    */
   private void triggerGoalCelebration() {
-    goalCelebration = true;
+    state = MatchState.GOAL_CELEBRATION;
     goalResetTimer = GOAL_PAUSE;
     if (goldenTime) goldenGoalPending = true;
   }
 
   /** Beendet das Spiel und stoppt den Game-Loop-Timer. */
   private void endMatch() {
-    matchEnded = true;
+    state = MatchState.ENDED;
     gameTimer.stop();
+    for (MatchListener listener : matchListeners) {
+      listener.onMatchEnded(team1.name, p1.score, team2.name, p2.score);
+    }
     repaint();
   }
 
@@ -478,6 +529,9 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     }
 
     matchEvents.add(new GoalEvent(timeStr, name, isOwnGoal, goldenTime, scorer == p1));
+    for (MatchListener listener : matchListeners) {
+      listener.onGoal(name, isOwnGoal, goldenTime);
+    }
   }
 
   /**
@@ -501,7 +555,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     g2d.scale(scale, scale);
     g2d.clipRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 
-    boolean cheering = goalCelebration || matchEnded;
+    boolean cheering = state == MatchState.GOAL_CELEBRATION || state == MatchState.ENDED;
 
     // 1. Hintergrund
     stadium.drawBackground(g2d, cheering);
@@ -523,8 +577,8 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
 
     // 5. HUD, Tor-Text, Endbildschirm
     drawHUD(g2d);
-    if (goalCelebration) drawGoalText(g2d);
-    if (matchEnded) drawEndScreen(g2d);
+    if (state == MatchState.GOAL_CELEBRATION) drawGoalText(g2d);
+    if (state == MatchState.ENDED) drawEndScreen(g2d);
 
     g2d.dispose();
   }
@@ -574,7 +628,10 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     g.setColor(C_WHITE);
     centerString(g, score, 500, 90);
 
-    String timeStr = goldenTime ? "GOLDEN: " + formatTime(extraTime) : formatTime(timeLeft);
+    String timeStr =
+        goldenTime
+            ? Messages.get("hud.golden") + " " + formatTime(extraTime)
+            : formatTime(timeLeft);
     Color tc = goldenTime ? C_GOLD : (timeLeft <= 10 ? C_OWN_GOAL : C_ACCENT);
     g.setFont(goldenTime ? F_TIMER_GG : F_TIMER);
     g.setColor(tc);
@@ -582,10 +639,10 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
 
     drawGlowDot(g, 335, 55, displayColor(team1.primaryColor));
     drawGlowDot(g, 665, 55, displayColor(team2.primaryColor));
-    if (!paused) {
+    if (state != MatchState.PAUSED) {
       g.setFont(F_HINT);
       g.setColor(new Color(255, 255, 255, 90));
-      String hint = "ESC — pausieren";
+      String hint = Messages.get("hud.pauseHint");
       int hw = g.getFontMetrics().stringWidth(hint);
       g.drawString(hint, (BASE_WIDTH - hw) / 2, BASE_HEIGHT - 12);
     }
@@ -615,7 +672,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
    * @param g Grafik-Kontext
    */
   private void drawGoalText(Graphics2D g) {
-    String txt = "TOOOOOOR!";
+    String txt = Messages.get("goal.text");
     int fontSize = 100;
 
     g.setFont(F_GOAL_TEXT);
@@ -672,13 +729,13 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     String title;
     Color titleColor;
     if (p1.score > p2.score) {
-      title = team1.name + "  GEWINNT!";
+      title = team1.name + Messages.get("end.winSuffix");
       titleColor = displayColor(team1.primaryColor);
     } else if (p2.score > p1.score) {
-      title = team2.name + "  GEWINNT!";
+      title = team2.name + Messages.get("end.winSuffix");
       titleColor = displayColor(team2.primaryColor);
     } else {
-      title = "UNENTSCHIEDEN";
+      title = Messages.get("end.draw");
       titleColor = C_ACCENT;
     }
 
@@ -730,8 +787,8 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
     drawEventColumn(g, leftEvents, startY, maxRows, true);
     drawEventColumn(g, rightEvents, startY, maxRows, false);
 
-    drawNeonButton(g, "NOCH EINMAL", BTN_REPLAY, new Color(0, 140, 255));
-    drawNeonButton(g, "MENÜ", BTN_MENU, new Color(180, 30, 80));
+    drawNeonButton(g, Messages.get("end.replay"), BTN_REPLAY, new Color(0, 140, 255));
+    drawNeonButton(g, Messages.get("end.menu"), BTN_MENU, new Color(180, 30, 80));
   }
 
   /**
@@ -763,7 +820,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
 
     for (int i = fromIdx; i < total && (i - fromIdx) < shown; i++) {
       GoalEvent ev = events.get(i);
-      String label = ev.isOwnGoal ? ev.playerName + "  (Eigentor)" : ev.playerName;
+      String label = ev.isOwnGoal ? ev.playerName + Messages.get("end.ownGoal") : ev.playerName;
       if (ev.isGoldenGoal) label += "  ⭐";
       Color entryColor = ev.isOwnGoal ? C_OWN_GOAL_C : C_WHITE;
 
@@ -865,7 +922,7 @@ public final class GamePanel extends JPanel implements ActionListener, MouseList
    */
   @Override
   public void mouseClicked(MouseEvent e) {
-    if (!matchEnded) return;
+    if (state != MatchState.ENDED) return;
     int mx = (int) ((e.getX() - offsetX) / scale);
     int my = (int) ((e.getY() - offsetY) / scale);
     if (BTN_REPLAY.contains(mx, my)) {

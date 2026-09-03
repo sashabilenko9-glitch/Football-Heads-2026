@@ -2,6 +2,7 @@ package ui;
 
 import com.footballheads.GameFrame;
 import com.footballheads.GamePanel;
+import com.footballheads.Messages;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -33,20 +34,29 @@ public final class PauseMenu extends JPanel {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.insets = new Insets(12, 0, 12, 0);
 
-    JLabel title = new JLabel("PAUSE");
+    JLabel title = new JLabel(Messages.get("pause.title"));
     title.setFont(new Font("Arial Black", Font.BOLD, 90));
     title.setForeground(new Color(0, 210, 255));
     add(title, gbc);
 
     add(Box.createVerticalStrut(8), gbc);
 
-    add(createNeonButton("WEITER", new Color(0, 160, 255), e -> gamePanel.togglePause()), gbc);
+    add(
+        createNeonButton(
+            Messages.get("pause.resume"), new Color(0, 160, 255), e -> gamePanel.togglePause()),
+        gbc);
 
     // restartGame() hebt die Pause selbst auf und blendet dieses Menü aus –
     // ein zusätzliches togglePause() würde die Pause sofort wieder aktivieren.
-    add(createNeonButton("NEUSTART", new Color(0, 100, 200), e -> gamePanel.restartGame()), gbc);
+    add(
+        createNeonButton(
+            Messages.get("pause.restart"), new Color(0, 100, 200), e -> gamePanel.restartGame()),
+        gbc);
 
-    add(createNeonButton("HAUPTMENÜ", new Color(140, 20, 55), e -> frame.returnToMenu()), gbc);
+    add(
+        createNeonButton(
+            Messages.get("pause.menu"), new Color(140, 20, 55), e -> frame.returnToMenu()),
+        gbc);
   }
 
   /**

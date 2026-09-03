@@ -2,6 +2,7 @@ package ui;
 
 import com.footballheads.GameFrame;
 import com.footballheads.GamePanel;
+import com.footballheads.Messages;
 import java.awt.*;
 import javax.swing.*;
 
@@ -28,14 +29,18 @@ public final class InGameUI extends JPanel {
     if (controlsOverlay != null) {
       add(
           createNeonButton(
-              "TASTEN",
+              Messages.get("ingame.keys"),
               new Color(0, 110, 170),
               e -> controlsOverlay.setVisible(!controlsOverlay.isVisible())));
     }
 
-    add(createNeonButton("RESTART", new Color(0, 160, 255), e -> gamePanel.restartGame()));
+    add(
+        createNeonButton(
+            Messages.get("ingame.restart"), new Color(0, 160, 255), e -> gamePanel.restartGame()));
 
-    add(createNeonButton("MENÜ", new Color(180, 30, 70), e -> frame.returnToMenu()));
+    add(
+        createNeonButton(
+            Messages.get("ingame.menu"), new Color(180, 30, 70), e -> frame.returnToMenu()));
   }
 
   /**

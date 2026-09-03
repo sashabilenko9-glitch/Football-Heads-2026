@@ -1,6 +1,7 @@
 package ui;
 
 import com.footballheads.GameFrame;
+import com.footballheads.Messages;
 import entities.Player;
 import entities.Stadium;
 import entities.Team;
@@ -46,7 +47,7 @@ public final class TeamSelectPanel extends JPanel {
 
     bgStadium = new Stadium();
 
-    JLabel title = new JLabel("TEAM WÄHLEN", JLabel.CENTER);
+    JLabel title = new JLabel(Messages.get("teamselect.title"), JLabel.CENTER);
     title.setFont(new Font(FONT_ARIAL_BLACK, Font.BOLD, 52));
     title.setForeground(Color.WHITE);
     title.setBorder(BorderFactory.createEmptyBorder(24, 0, 14, 0));
@@ -60,8 +61,8 @@ public final class TeamSelectPanel extends JPanel {
     warnLabel.setFont(new Font(FONT_ARIAL, Font.BOLD, 20));
     warnLabel.setForeground(C_WARN);
 
-    selectorP1 = new TeamSelector("SPIELER 1  (W A S D)", true);
-    selectorP2 = new TeamSelector("SPIELER 2  (Pfeiltasten)", false);
+    selectorP1 = new TeamSelector(Messages.get("teamselect.player1"), true);
+    selectorP2 = new TeamSelector(Messages.get("teamselect.player2"), false);
     selectorP2.nextTeam();
 
     center.add(selectorP1);
@@ -71,8 +72,11 @@ public final class TeamSelectPanel extends JPanel {
     JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 12));
     buttonRow.setOpaque(false);
     buttonRow.add(
-        createNeonButton("SPIEL BEGINNEN", new Color(0, 140, 255), e -> startGame(parentFrame)));
-    buttonRow.add(createNeonButton("ZURÜCK", new Color(140, 20, 55), e -> onBack.run()));
+        createNeonButton(
+            Messages.get("teamselect.start"), new Color(0, 140, 255), e -> startGame(parentFrame)));
+    buttonRow.add(
+        createNeonButton(
+            Messages.get("teamselect.back"), new Color(140, 20, 55), e -> onBack.run()));
 
     JPanel bottom = new JPanel();
     bottom.setOpaque(false);
@@ -94,7 +98,7 @@ public final class TeamSelectPanel extends JPanel {
     Team t1 = selectorP1.getSelectedTeam();
     Team t2 = selectorP2.getSelectedTeam();
     if (t1.name.equals(t2.name)) {
-      warnLabel.setText("BEIDE SPIELER HABEN DAS GLEICHE TEAM — BITTE UNTERSCHIEDLICH WÄHLEN");
+      warnLabel.setText(Messages.get("teamselect.sameTeamWarning"));
       return;
     }
     if (parentFrame != null) parentFrame.dispose();

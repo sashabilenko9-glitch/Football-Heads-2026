@@ -1,6 +1,8 @@
 package ui;
 
+import com.footballheads.Messages;
 import java.awt.*;
+import java.util.Locale;
 import javax.swing.*;
 
 /**
@@ -84,24 +86,38 @@ public final class MenuPanel extends JPanel {
     title.setForeground(C_WHITE);
     menuContent.add(title, gbc);
 
-    JLabel subtitle = new JLabel("2 SPIELER  ·  60 SEKUNDEN  ·  CHAOS");
+    JLabel subtitle = new JLabel(Messages.get("menu.subtitle"));
     subtitle.setFont(new Font("Arial", Font.BOLD, 26));
     subtitle.setForeground(C_CYAN);
     menuContent.add(subtitle, gbc);
 
     menuContent.add(Box.createVerticalStrut(10), gbc);
 
-    JButton playButton = createMenuButton("ZUM SPIEL", C_BLUE);
+    JButton playButton = createMenuButton(Messages.get("menu.play"), C_BLUE);
     playButton.addActionListener(e -> cardLayout.show(this, "TEAM_SELECT"));
     menuContent.add(playButton, gbc);
 
-    JButton controlsButton = createMenuButton("STEUERUNG", new Color(0, 80, 160));
+    JButton controlsButton = createMenuButton(Messages.get("menu.controls"), new Color(0, 80, 160));
     controlsButton.addActionListener(e -> cardLayout.show(this, "CONTROLS"));
     menuContent.add(controlsButton, gbc);
 
-    JButton exitButton = createMenuButton("BEENDEN", new Color(140, 20, 50));
+    JButton exitButton = createMenuButton(Messages.get("menu.exit"), new Color(140, 20, 50));
     exitButton.addActionListener(e -> System.exit(0));
     menuContent.add(exitButton, gbc);
+
+    // Zeigt den Namen der jeweils ANDEREN Sprache in dieser Sprache selbst (übliche UX-Konvention),
+    // damit der Umschalter auch dann auffindbar bleibt, wenn man die aktuelle Sprache nicht liest.
+    JButton languageButton = createMenuButton(otherLanguageDisplayName(), new Color(70, 70, 80));
+    languageButton.setFont(new Font("Arial", Font.BOLD, 22));
+    languageButton.setPreferredSize(new Dimension(220, 50));
+    languageButton.addActionListener(
+        e -> {
+          Messages.setLocale(isGerman() ? Locale.ENGLISH : Locale.GERMAN);
+          parentFrame.setContentPane(new MenuPanel(parentFrame));
+          parentFrame.revalidate();
+          parentFrame.repaint();
+        });
+    menuContent.add(languageButton, gbc);
 
     controlsPanel = new ControlsPanel(this::showMenu);
     teamSelectPanel = new TeamSelectPanel(parentFrame, this::showMenu);
@@ -241,5 +257,13 @@ public final class MenuPanel extends JPanel {
   /** Wechselt zurück zur Hauptmenü-Karte. */
   private void showMenu() {
     cardLayout.show(this, "MENU");
+  }
+
+  private static boolean isGerman() {
+    return Messages.getLocale().getLanguage().equals(Locale.GERMAN.getLanguage());
+  }
+
+  private static String otherLanguageDisplayName() {
+    return isGerman() ? "English" : "Deutsch";
   }
 }

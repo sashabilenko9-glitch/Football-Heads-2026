@@ -1,5 +1,6 @@
 package ui;
 
+import com.footballheads.Messages;
 import java.awt.*;
 import javax.swing.*;
 
@@ -28,31 +29,31 @@ public final class ControlsPanel extends JPanel {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.insets = new Insets(12, 0, 12, 0);
 
-    JLabel title = new JLabel("STEUERUNG", JLabel.CENTER);
+    JLabel title = new JLabel(Messages.get("controls.title"), JLabel.CENTER);
     title.setFont(new Font("Arial Black", Font.BOLD, 70));
     title.setForeground(Color.YELLOW);
     add(title, gbc);
 
-    addLabel("Spieler 1 (links):", Color.WHITE, 40, gbc);
-    addLabel("Bewegung — A / D", Color.CYAN, 36, gbc);
-    addLabel("Sprung — W", Color.CYAN, 36, gbc);
-    addLabel("Schießen — S", Color.CYAN, 36, gbc);
+    addLabel(Messages.get("controls.player1"), Color.WHITE, 40, gbc);
+    addLabel(Messages.get("controls.movement1"), Color.CYAN, 36, gbc);
+    addLabel(Messages.get("controls.jump1"), Color.CYAN, 36, gbc);
+    addLabel(Messages.get("controls.kick1"), Color.CYAN, 36, gbc);
 
     add(Box.createVerticalStrut(16), gbc);
 
-    addLabel("Spieler 2 (rechts):", Color.WHITE, 40, gbc);
-    addLabel("Bewegung — ← →", Color.MAGENTA, 36, gbc);
-    addLabel("Sprung — ↑", Color.MAGENTA, 36, gbc);
-    addLabel("Schießen — ↓", Color.MAGENTA, 36, gbc);
+    addLabel(Messages.get("controls.player2"), Color.WHITE, 40, gbc);
+    addLabel(Messages.get("controls.movement2"), Color.MAGENTA, 36, gbc);
+    addLabel(Messages.get("controls.jump2"), Color.MAGENTA, 36, gbc);
+    addLabel(Messages.get("controls.kick2"), Color.MAGENTA, 36, gbc);
 
     add(Box.createVerticalStrut(16), gbc);
 
-    addLabel("ESC — Pause", Color.LIGHT_GRAY, 26, gbc);
-    addLabel("Bildschirm-Tasten: per Maus (eine Taste gleichzeitig)", Color.LIGHT_GRAY, 26, gbc);
+    addLabel(Messages.get("controls.pause"), Color.LIGHT_GRAY, 26, gbc);
+    addLabel(Messages.get("controls.mobileHint"), Color.LIGHT_GRAY, 26, gbc);
 
     add(Box.createVerticalStrut(28), gbc);
 
-    JButton close = new JButton("SCHLIESSEN");
+    JButton close = new JButton(Messages.get("controls.close"));
     close.setFont(new Font("Arial", Font.BOLD, 40));
     close.setBackground(Color.RED.darker());
     close.setForeground(Color.WHITE);
