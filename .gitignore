@@ -10,10 +10,8 @@
 # Generated Javadoc (regenerate with: ./gradlew javadoc -> build/docs/javadoc)
 /doc/
 
-# University submission files (not part of the game)
-Abgabe_*.zip
-BelegBilenko*.pdf
-BelegBilenko*.docx
+# University submission files (not part of the game - see uni-submission/)
+/uni-submission/
 
 # Eclipse (Buildship regenerates these on Gradle import - not committed)
 .classpath
