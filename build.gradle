@@ -1,5 +1,6 @@
 plugins {
     id 'application'
+    id 'eclipse'
     id 'checkstyle'
     id 'pmd'
     id 'jacoco'
@@ -10,6 +11,18 @@ plugins {
 
 group = 'com.footballheads'
 version = '1.0.0'
+
+// The on-disk folder is football_heads.com, but the Gradle project name
+// (settings.gradle) is football-heads-2026 (used for jar/release artifact
+// names). Eclipse/Buildship requires a project living directly under the
+// workspace root to keep the folder's name, so pin the Eclipse-visible
+// project name separately rather than renaming either the folder or the
+// Gradle project.
+eclipse {
+    project {
+        name = 'football_heads.com'
+    }
+}
 
 java {
     toolchain {
