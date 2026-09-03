@@ -1,0 +1,23 @@
+# Compiled output
+/bin/
+*.class
+
+# Generated Javadoc (regenerate with: javadoc -d doc -sourcepath src -subpackages com:entities:ui:utils)
+/doc/
+
+# University submission files (not part of the game)
+Abgabe_*.zip
+BelegBilenko*.pdf
+BelegBilenko*.docx
+
+# Eclipse (workspace-level, not the small shared .settings/ prefs)
+.metadata/
+*.launch
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Editors
+.vscode/
+*.swp
