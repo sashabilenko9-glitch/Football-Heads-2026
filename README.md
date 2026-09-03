@@ -9,6 +9,8 @@ A local 2-player "Head Soccer" style game built in Java Swing — fast, chaotic 
 
 > Note: the in-game UI text is in German (this was originally a university programming assignment). This document is in English for a wider audience.
 
+See [CHANGELOG.md](CHANGELOG.md) for release notes and [ROADMAP.md](ROADMAP.md) for what's planned next.
+
 ## Screenshots
 
 <!-- Add screenshots here, e.g.: -->
